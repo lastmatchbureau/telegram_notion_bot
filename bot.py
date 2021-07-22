@@ -21,8 +21,7 @@ def next_command(message):
     tasks = nh.get_task()
     for task in tasks:
         try:
-            task = fix_links(task)
-            bot.send_message(message.chat.id, task, parse_mode="html", disable_web_page_preview=True)
+            bot.send_message(message.chat.id, task, parse_mode="MarkdownV2",     disable_web_page_preview=True)
         except Exception as e:
             print(e.args)
             print(task)

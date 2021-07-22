@@ -10,16 +10,36 @@ from dotenv import load_dotenv
 class NotionHandler:
     __REALIZED_BLOCKS = (SubsubheaderBlock, TextBlock, TodoBlock, FileBlock, NumberedListBlock, ColumnListBlock,
                          DividerBlock, CollectionViewBlock, ImageBlock)
-    __BOLD_SYMBOL_START = "<b>"
-    __BOLD_SYMBOL_END = "</b>"
+    __BOLD_SYMBOL_START = "*"
+    __BOLD_SYMBOL_END = "*"
     __TODO_TRUE_SMBL = " ✅"
     __TODO_FALSE_SMBL = " ❌"
     __END_LINE_SMBL = "\n"
+    __RESERVED_SMBLS = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+    __RESERVED_SMBLS_W_BRACKETS = ['_', '*', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
 
     def __init__(self):
         load_dotenv('.env')
         self.token_v2 = environ["token_v2"]
         self.client = NotionClient(self.token_v2)
+
+    def __prepare_txt_4_md(self, txt: str) -> str:
+        txt = str(txt)
+        for smbl in self.__RESERVED_SMBLS:
+            txt = txt.replace(smbl, "\\" + smbl)
+        return txt
+
+    def __prepare_txt_4_md_v2(self, txt: str) -> str:
+        """
+        This function replace only non brackets symbols.
+        Brackets symbols is "()[]"
+        :param txt:
+        :return:
+        """
+        txt = str(txt)
+        for smbl in self.__RESERVED_SMBLS_W_BRACKETS:
+            txt = txt.replace(smbl, "\\" + smbl)
+        return txt
 
     @staticmethod
     def __get_attrs_from_item_schema(item: CollectionRowBlock) -> dict:
@@ -32,37 +52,47 @@ class NotionHandler:
         return self.__END_LINE_SMBL
 
     def __image_wrapper(self, item: ImageBlock):
-        return f"{item.caption}: {item.get_browseable_url()}" + self.__END_LINE_SMBL
+        txt = self.__prepare_txt_4_md(f"{item.caption}: {item.get_browseable_url()}")
+        return txt + self.__END_LINE_SMBL
 
     def __table_query_wrapper(self, item: CollectionRowBlock) -> str:
-        txt = ""
+        txt = "\-\-\-\-\-\-\-\-\-\-" + self.__END_LINE_SMBL
         attrs = self.__get_attrs_from_item_schema(item)
         for name, slug in attrs.items():
-            txt += f"{name}: {item.__getattr__(slug)}" + self.__END_LINE_SMBL
+            name = self.__prepare_txt_4_md(name)
+            value = self.__prepare_txt_4_md(item.__getattr__(slug))
+            txt += f"{name}: {value}" + self.__END_LINE_SMBL
+            if value is None or value == "":
+                txt = ""
+                break
         return txt
 
     def __ss_header_wrapper(self, item: SubsubheaderBlock) -> str:
         return self.__txt_to_bold(item.title) + self.__END_LINE_SMBL
 
     def __txt_wrapper(self, item: TextBlock) -> str:
-        return item.title + self.__END_LINE_SMBL
+        txt = self.__prepare_txt_4_md(item.title_plaintext)
+        return txt + self.__END_LINE_SMBL
 
     def __todo_wrapper(self, item: TodoBlock) -> str:
-        txt = ""
+        txt = self.__prepare_txt_4_md(item.title_plaintext)
         if item.checked:
-            txt += item.title + self.__TODO_TRUE_SMBL + self.__END_LINE_SMBL
+            txt += self.__TODO_TRUE_SMBL + self.__END_LINE_SMBL
         else:
-            txt += item.title + self.__TODO_FALSE_SMBL + self.__END_LINE_SMBL
+            txt += self.__TODO_FALSE_SMBL + self.__END_LINE_SMBL
         return txt
 
     def __file_wrapper(self, item: FileBlock) -> str:
-        return item.title + " url: " + item.get_browseable_url() + self.__END_LINE_SMBL
+        txt = self.__prepare_txt_4_md(item.title + " url: " + item.get_browseable_url())
+        return txt + self.__END_LINE_SMBL
 
     def __num_list_wrapper(self, item: NumberedListBlock) -> str:
-        return item.title_plaintext + self.__END_LINE_SMBL
+        txt = self.__prepare_txt_4_md(item.title_plaintext)
+        return txt + self.__END_LINE_SMBL
 
     def __collection_view_wrapper(self, item: CollectionViewBlock) -> str:
-        txt = self.__txt_to_bold(item.title) + self.__END_LINE_SMBL
+        txt = self.__prepare_txt_4_md(item.title)
+        txt = self.__txt_to_bold(txt) + self.__END_LINE_SMBL
         for row in item.collection.get_rows():
             if row.title != "" or row.title is not None:
                 txt += self.__table_query_wrapper(row)
@@ -72,6 +102,7 @@ class NotionHandler:
         return isinstance(item, self.__REALIZED_BLOCKS)
 
     def __txt_to_bold(self, txt: str) -> str:
+        txt = self.__prepare_txt_4_md(txt)
         return f"{self.__BOLD_SYMBOL_START}{txt}{self.__BOLD_SYMBOL_END}"
 
     def __convert_2_txt_md(self, item: Block) -> str:
