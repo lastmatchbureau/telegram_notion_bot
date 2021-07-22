@@ -1,9 +1,8 @@
-import os
-
 import telebot
 from notion_module import NotionHandler
 from dotenv import load_dotenv
 from os import environ
+from upload_func import upload_file
 
 load_dotenv('.env')
 token = environ["API_KEY"]
@@ -18,6 +17,7 @@ def start_command(message):
 
 @bot.message_handler(commands=["test"])
 def next_command(message):
+    print(message.chat.id)
     nh = NotionHandler()
     tasks = nh.get_task()
     for task in tasks:
@@ -25,8 +25,7 @@ def next_command(message):
         bot.send_message(message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
         if files_to_upload:
             for file in files_to_upload:
-                bot.send_document(message.chat.id, open(file, 'rb'))
-                os.remove(file)
+                upload_file(message.chat.id, file, token)
 
 
 bot.polling()

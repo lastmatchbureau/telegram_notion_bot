@@ -5,7 +5,7 @@ from notion.collection import CollectionRowBlock
 from settings import main_page_url
 from os import environ
 from dotenv import load_dotenv
-from os import remove, walk, path
+from os import path
 
 
 class NotionHandler:
@@ -99,7 +99,9 @@ class NotionHandler:
 
     def __file_wrapper(self, item: FileBlock) -> str:
         txt = self.__prepare_txt_4_md(item.title + " url: " + item.get_browseable_url())
+        print(f"downloading: {item.title}")
         self.__download_file(item, name=item.title)
+        print(f"downloaded: {item.title}")
         return txt + self.__END_LINE_SMBL
 
     def __num_list_wrapper(self, item: NumberedListBlock) -> str:
@@ -173,13 +175,6 @@ class NotionHandler:
                 print(f"unknown instance: {type(item)} : {item.__repr__()}")
 
         return msg
-
-    def delete_downloaded_files(self):
-        for root, files, dir in walk("download"):
-            for file in files:
-                print("download", file)
-                remove(path.join("download", file))
-        self.downloaded_files = []
 
     def get_tasks(self) -> tuple[str]:
         processed_tasks = tuple()
