@@ -1,15 +1,16 @@
 from notion.client import NotionClient
 from notion.block import SubsubheaderBlock, TextBlock, FileBlock, TodoBlock, NumberedListBlock, ColumnListBlock, \
-    Block, CollectionViewBlock, DividerBlock, ImageBlock
+    Block, CollectionViewBlock, DividerBlock, ImageBlock, EmbedOrUploadBlock
 from notion.collection import CollectionRowBlock
 from settings import main_page_url
 from os import environ
 from dotenv import load_dotenv
+from os import remove, walk, path
 
 
 class NotionHandler:
     __REALIZED_BLOCKS = (SubsubheaderBlock, TextBlock, TodoBlock, FileBlock, NumberedListBlock, ColumnListBlock,
-                         DividerBlock, CollectionViewBlock, ImageBlock)
+                         DividerBlock, CollectionViewBlock, ImageBlock, EmbedOrUploadBlock)
     __BOLD_SYMBOL_START = "*"
     __BOLD_SYMBOL_END = "*"
     __TODO_TRUE_SMBL = " ✅"
@@ -22,6 +23,19 @@ class NotionHandler:
         load_dotenv('.env')
         self.token_v2 = environ["token_v2"]
         self.client = NotionClient(self.token_v2)
+        self.downloaded_files = []
+
+    @staticmethod
+    def __get_file_path(name: str) -> str:
+        return path.join("download", name)
+
+    def __get_file_name(self, item: EmbedOrUploadBlock):
+        pass
+
+    def __download_file(self, item: EmbedOrUploadBlock, name):
+        path = self.__get_file_path(name)
+        item.download_file(path)
+        self.downloaded_files.append(path)
 
     def __prepare_txt_4_md(self, txt: str) -> str:
         txt = str(txt)
@@ -52,7 +66,8 @@ class NotionHandler:
         return self.__END_LINE_SMBL
 
     def __image_wrapper(self, item: ImageBlock):
-        txt = self.__prepare_txt_4_md(f"{item.caption}: {item.get_browseable_url()}")
+        txt = self.__prepare_txt_4_md(f"{item.caption} img: {item.get_browseable_url()}")
+        self.__download_file(item, name=item.file_id + ".jpg")
         return txt + self.__END_LINE_SMBL
 
     def __table_query_wrapper(self, item: CollectionRowBlock) -> str:
@@ -84,6 +99,7 @@ class NotionHandler:
 
     def __file_wrapper(self, item: FileBlock) -> str:
         txt = self.__prepare_txt_4_md(item.title + " url: " + item.get_browseable_url())
+        self.__download_file(item, name=item.title)
         return txt + self.__END_LINE_SMBL
 
     def __num_list_wrapper(self, item: NumberedListBlock) -> str:
@@ -145,6 +161,7 @@ class NotionHandler:
         return msg
 
     def __get_msg(self, task: CollectionRowBlock) -> str:
+        self.downloaded_files = []
         msg = self.__txt_to_bold(task.title) + self.__END_LINE_SMBL
         for item in task.children:
             if self.__item_is_used(item):
@@ -156,6 +173,13 @@ class NotionHandler:
                 print(f"unknown instance: {type(item)} : {item.__repr__()}")
 
         return msg
+
+    def delete_downloaded_files(self):
+        for root, files, dir in walk("download"):
+            for file in files:
+                print("download", file)
+                remove(path.join("download", file))
+        self.downloaded_files = []
 
     def get_tasks(self) -> tuple[str]:
         processed_tasks = tuple()
