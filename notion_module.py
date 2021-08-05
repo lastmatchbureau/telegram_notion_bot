@@ -193,6 +193,14 @@ class NotionHandler:
             task_msg = self.__get_msg(task)
             yield task_msg
 
+    def find_tasks(self, task_title) -> str:
+        main_page = self.client.get_block(main_page_url)
+        tasks = main_page.collection.get_rows()
+        for task in tasks:
+            if task_title in task.title:
+                task_msg = self.__get_msg(task)
+                yield task_msg
+
 
 if __name__ == "__main__":
     nh = NotionHandler()
