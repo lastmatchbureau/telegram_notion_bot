@@ -1,6 +1,5 @@
 import telebot
-from telebot.types import Message
-
+from telebot.types import Message, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from notion_handler import NotionHandler, SearchProperties
 from dotenv import load_dotenv
 from os import environ
@@ -10,6 +9,8 @@ load_dotenv('.env')
 token = environ["API_KEY"]
 
 bot = telebot.TeleBot(token)
+reply_button = InlineKeyboardMarkup(row_width=1)
+reply_button.add(InlineKeyboardButton("stop", callback_data="stop_search"))
 
 
 def delete_prefix(message: Message):
@@ -60,10 +61,20 @@ def search_name_command(message):
     tasks = nh.find_tasks(search_prop=sp)
     for task in tasks:
         files_to_upload = nh.downloaded_files
-        bot.send_message(message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
+        bot.send_message(message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True,
+                         reply_markup=reply_button)
         if files_to_upload:
             for file in files_to_upload:
                 upload_file(message.chat.id, file, token)
 
 
-bot.polling()
+@bot.callback_query_handler(func=lambda call: call=="stop_search")
+def stop_search(call):
+    pass
+
+
+while True:
+    try:
+        bot.polling()
+    except Exception as e:
+        bot.send_message(231584958, str(e.args))

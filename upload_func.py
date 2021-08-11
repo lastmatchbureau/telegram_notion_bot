@@ -12,5 +12,5 @@ def upload_file(chat_id, file_path, api_token):
         print(f"sent {file_path} with size: {file_size} mb")
     else:
         url = f'https://api.telegram.org/bot{api_token}/sendMessage'
-        r = requests.post(url, json={"text": f"{file_path.replace('download', '')} is bigger than 50 mb.", "chat_id": chat_id},)
+        r = requests.post(url, json={"text": f"{file_path.replace('download/', '')} is bigger than 50 mb.", "chat_id": chat_id},)
     remove(file_path)
