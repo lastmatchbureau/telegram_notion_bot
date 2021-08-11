@@ -33,6 +33,7 @@ class NotionHandler:
         pass
 
     def __download_file(self, item: EmbedOrUploadBlock, name):
+        return 0
         path = self.__get_file_path(name)
         item.download_file(path)
         self.downloaded_files.append(path)
@@ -164,7 +165,7 @@ class NotionHandler:
 
     def __get_msg(self, task: CollectionRowBlock) -> str:
         self.downloaded_files = []
-        msg = self.__txt_to_bold(task.title) + self.__END_LINE_SMBL
+        msg = self.__get_task_header(task)
         for item in task.children:
             if self.__item_is_used(item):
                 msg += self.__convert_2_txt_md(item)
@@ -200,6 +201,12 @@ class NotionHandler:
             if task_title in task.title:
                 task_msg = self.__get_msg(task)
                 yield task_msg
+
+    def __get_task_header(self, task):
+        title = self.__txt_to_bold(task.title) + self.__END_LINE_SMBL + self.__END_LINE_SMBL
+        status = self.__txt_to_bold(task.status) + self.__END_LINE_SMBL
+        t_type = self.__txt_to_bold(task.tip) + self.__END_LINE_SMBL
+        return f"{title}{status}{t_type}"
 
 
 if __name__ == "__main__":
