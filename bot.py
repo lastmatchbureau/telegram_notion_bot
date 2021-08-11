@@ -1,7 +1,7 @@
 import telebot
 from telebot.types import Message
 
-from notion_module import NotionHandler
+from notion_handler import NotionHandler
 from dotenv import load_dotenv
 from os import environ
 from upload_func import upload_file
