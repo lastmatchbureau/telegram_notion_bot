@@ -8,6 +8,19 @@ from dotenv import load_dotenv
 from os import path
 
 
+class SearchProperties:
+    def __init__(self, title="", t_type="", status="", date=""):
+        self.title = title
+        self.t_type = t_type
+        self.status = status
+        self.date = date
+
+    def is_suitable(self, task: CollectionRowBlock):
+        # TODO: create date checker
+        return (self.title in task.title or self.title == "") and (self.t_type in task.tip or self.t_type == "") \
+               and (self.status in task.status or self.status == "") and (self.date == task.created or self.date == "")
+
+
 class NotionHandler:
     __REALIZED_BLOCKS = (SubsubheaderBlock, TextBlock, TodoBlock, FileBlock, NumberedListBlock, ColumnListBlock,
                          DividerBlock, CollectionViewBlock, ImageBlock, EmbedOrUploadBlock)
@@ -193,11 +206,11 @@ class NotionHandler:
             task_msg = self.__get_msg(task)
             yield task_msg
 
-    def find_tasks(self, task_title) -> str:
+    def find_tasks(self, search_prop: SearchProperties) -> str:
         main_page = self.client.get_block(main_page_url)
         tasks = main_page.collection.get_rows()
         for task in tasks:
-            if task_title in task.title:
+            if search_prop.is_suitable(task):
                 task_msg = self.__get_msg(task)
                 yield task_msg
 

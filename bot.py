@@ -1,7 +1,7 @@
 import telebot
 from telebot.types import Message
 
-from notion_handler import NotionHandler
+from notion_handler import NotionHandler, SearchProperties
 from dotenv import load_dotenv
 from os import environ
 from upload_func import upload_file
@@ -12,9 +12,12 @@ token = environ["API_KEY"]
 bot = telebot.TeleBot(token)
 
 
-def delete_prefix(x: Message):
-    x.text = x.text.replace("/search ", "")
-    return x
+def delete_prefix(message: Message):
+    if "/search_name " in message.text:
+        message.text = message.text.replace("/search_name ", "")
+    if "/search_type " in message.text:
+        message.text = message.text.replace("/search_type ", "")
+    return message
 
 
 @bot.message_handler(commands=["start"])
@@ -35,11 +38,26 @@ def next_command(message):
                 upload_file(message.chat.id, file, token)
 
 
-@bot.message_handler(commands=['search'], func=delete_prefix)
-def search_command(message):
+@bot.message_handler(commands=['search_name'], func=delete_prefix)
+def search_name_command(message):
     print(message.text)
     nh = NotionHandler()
-    tasks = nh.find_tasks(task_title=message.text)
+    sp = SearchProperties(title=message.text)
+    tasks = nh.find_tasks(search_prop=sp)
+    for task in tasks:
+        files_to_upload = nh.downloaded_files
+        bot.send_message(message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
+        if files_to_upload:
+            for file in files_to_upload:
+                upload_file(message.chat.id, file, token)
+
+
+@bot.message_handler(commands=['search_type'], func=delete_prefix)
+def search_name_command(message):
+    print(message.text)
+    nh = NotionHandler()
+    sp = SearchProperties(t_type=message.text)
+    tasks = nh.find_tasks(search_prop=sp)
     for task in tasks:
         files_to_upload = nh.downloaded_files
         bot.send_message(message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
