@@ -1,0 +1,12 @@
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+start_search_reply_buttons = InlineKeyboardMarkup(row_width=1)
+start_search_reply_buttons.add(InlineKeyboardButton("Начать поиск", callback_data=f"next1"))
+start_search_reply_buttons.add(InlineKeyboardButton("Показать следующую задачу выдаче", callback_data=f"next1"))
+start_search_reply_buttons.add(InlineKeyboardButton("Показать следующие 5 задач в выдаче", callback_data=f"next5"))
+start_search_reply_buttons.add(InlineKeyboardButton("Показать следующие 10 задач в выдаче", callback_data=f"next10"))
+start_search_reply_buttons.add(InlineKeyboardButton("Закончить поиск", callback_data=f"stopsearch"))
+continue_search_reply_buttons = InlineKeyboardMarkup(row_width=1)
+continue_search_reply_buttons.add(InlineKeyboardButton("Показать следующую задачу выдаче", callback_data=f"next1"))
+continue_search_reply_buttons.add(InlineKeyboardButton("Показать следующие 5 задач в выдаче", callback_data=f"next5"))
+continue_search_reply_buttons.add(InlineKeyboardButton("Показать следующие 10 задач в выдаче", callback_data=f"next10"))
+continue_search_reply_buttons.add(InlineKeyboardButton("Закончить поиск", callback_data=f"stopsearch"))

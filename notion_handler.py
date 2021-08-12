@@ -1,3 +1,5 @@
+import os.path
+
 from notion.client import NotionClient
 from notion.block import SubsubheaderBlock, TextBlock, FileBlock, TodoBlock, NumberedListBlock, ColumnListBlock, \
     Block, CollectionViewBlock, DividerBlock, ImageBlock, EmbedOrUploadBlock
@@ -9,15 +11,15 @@ from os import path
 
 
 class SearchProperties:
-    def __init__(self, title="", t_type="", status="", date=""):
-        self.title = title
+    def __init__(self, name="", t_type="", status="", date=""):
+        self.name = name
         self.t_type = t_type
         self.status = status
         self.date = date
 
     def is_suitable(self, task: CollectionRowBlock):
         # TODO: create date checker
-        return (self.title in task.title or self.title == "") and (self.t_type in task.tip or self.t_type == "") \
+        return (self.name in task.title or self.name == "") and (self.t_type in task.tip or self.t_type == "") \
                and (self.status in task.status or self.status == "") and (self.date == task.created or self.date == "")
 
 
@@ -32,15 +34,27 @@ class NotionHandler:
     __RESERVED_SMBLS = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
     __RESERVED_SMBLS_W_BRACKETS = ['_', '*', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
 
-    def __init__(self):
+    def __init__(self, tg_id=None):
+        self.tg_id = tg_id
         load_dotenv('.env')
         self.token_v2 = environ["token_v2"]
         self.client = NotionClient(self.token_v2)
         self.downloaded_files = []
 
-    @staticmethod
-    def __get_file_path(name: str) -> str:
-        return path.join("download", name)
+    def delete_files(self):
+        for file in self.downloaded_files:
+            try:
+                os.remove(file)
+            except Exception:
+                pass
+
+    def __get_file_path(self, file_name: str) -> str:
+        user_folder_path = path.join("download", str(self.tg_id))
+        try:
+            os.mkdir(user_folder_path)
+        except FileExistsError:
+            pass
+        return path.join(user_folder_path, file_name)
 
     def __get_file_name(self, item: EmbedOrUploadBlock):
         pass
