@@ -97,6 +97,13 @@ def callback_query_handler(call):
         bot.send_message(call.message.chat.id, "Поиск завершен")
 
 
-
-
-bot.polling()
+while True:
+    try:
+        nh = NotionHandler()
+        task = nh.new_task_available()
+        if task:
+            new_task_txt = nh.get_new_task(task)
+            bot.send_message(231584958, new_task_txt)
+        bot.polling()
+    except Exception as e:
+        bot.send_message(231584958, e)

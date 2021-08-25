@@ -1,16 +1,18 @@
 import os.path
 
+import settings
 from notion.client import NotionClient
 from notion.block import SubsubheaderBlock, TextBlock, FileBlock, TodoBlock, NumberedListBlock, ColumnListBlock, \
     Block, CollectionViewBlock, DividerBlock, ImageBlock, EmbedOrUploadBlock
 from notion.collection import CollectionRowBlock
-from settings import main_page_url
 from os import environ
 from dotenv import load_dotenv
 from os import path
+from time import time
 
 
 class SearchProperties:
+
     def __init__(self, name="", t_type="", status="", date=""):
         self.name = name
         self.t_type = t_type
@@ -24,6 +26,8 @@ class SearchProperties:
 
 
 class NotionHandler:
+    NOTION_PAGE_URL = \
+        "https://www.notion.so/smartspace/7dc7fe1fa5bc4cda8f286c7ea6ea1c2c?v=a4408676bda246f7bd1571134ef266a6"
     __REALIZED_BLOCKS = (SubsubheaderBlock, TextBlock, TodoBlock, FileBlock, NumberedListBlock, ColumnListBlock,
                          DividerBlock, CollectionViewBlock, ImageBlock, EmbedOrUploadBlock)
     __BOLD_SYMBOL_START = "*"
@@ -190,6 +194,7 @@ class NotionHandler:
         return msg
 
     def __get_msg(self, task: CollectionRowBlock) -> str:
+
         self.downloaded_files = []
         msg = self.__get_task_header(task)
         for item in task.children:
@@ -205,7 +210,7 @@ class NotionHandler:
 
     def get_tasks(self) -> tuple[str]:
         processed_tasks = tuple()
-        main_page = self.client.get_block(main_page_url)
+        main_page = self.client.get_block(self.NOTION_PAGE_URL)
         tasks = main_page.collection.get_rows()
         for task in tasks:
             task_msg = self.__get_msg(task)
@@ -214,19 +219,36 @@ class NotionHandler:
         return processed_tasks
 
     def get_task(self) -> str:
-        main_page = self.client.get_block(main_page_url)
+        main_page = self.client.get_block(self.NOTION_PAGE_URL)
         tasks = main_page.collection.get_rows()
         for task in tasks:
             task_msg = self.__get_msg(task)
             yield task_msg
 
+    def get_new_task(self, task: CollectionRowBlock):
+        new_task_txt = f"Найдена новая задача! Была создана: {task.created}"
+        new_task_txt += self.__get_msg(task)
+        return new_task_txt
+
     def find_tasks(self, search_prop: SearchProperties) -> str:
-        main_page = self.client.get_block(main_page_url)
+        main_page = self.client.get_block(self.NOTION_PAGE_URL)
         tasks = main_page.collection.get_rows()
         for task in tasks:
             if search_prop.is_suitable(task):
                 task_msg = self.__get_msg(task)
                 yield task_msg
+
+    def new_task_available(self):
+        if time() - settings.time_stamp > 1800:
+            main_page = self.client.get_block(self.NOTION_PAGE_URL)
+            latest_task = main_page.collection.get_rows()[0]
+            if latest_task.id == settings.LAST_TASK_ID:
+                return False
+            else:
+                with open("settings.py", "w") as f:
+                    f.writelines([f"LAST_TASK_ID = '{latest_task.id}'\n", f"time_stamp = {time()}"])
+                print(f"New task found: {latest_task.id} {latest_task.created}")
+                return latest_task
 
     def __get_task_header(self, task: CollectionRowBlock):
         title = self.__txt_to_bold(task.title) + self.__END_LINE_SMBL + self.__END_LINE_SMBL
