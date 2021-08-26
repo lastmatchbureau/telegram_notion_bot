@@ -1,6 +1,7 @@
 import requests
 from pathlib import Path
 from os import remove
+import glob
 
 
 def upload_file(chat_id, file_path, api_token):
@@ -14,3 +15,12 @@ def upload_file(chat_id, file_path, api_token):
         url = f'https://api.telegram.org/bot{api_token}/sendMessage'
         r = requests.post(url, json={"text": f"{file_path.replace('download/', '')} is bigger than 50 mb.", "chat_id": chat_id},)
     remove(file_path)
+
+
+def delete_downloaded_files(tg_id):
+    for file in glob.glob(f"download/{tg_id}/*"):
+        remove(file)
+
+
+def get_downloaded_files(tg_id):
+    return glob.glob(f"download/{tg_id}/*")
