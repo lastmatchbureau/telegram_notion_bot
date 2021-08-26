@@ -104,7 +104,7 @@ while True:
         if task:
             bot.send_chat_action(231584958, "typing", timeout=10)
             new_task_txt = nh.get_new_task(task)
-            bot.send_message(231584958, new_task_txt)
+            bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
         bot.polling()
     except Exception as e:
         bot.send_message(231584958, e)

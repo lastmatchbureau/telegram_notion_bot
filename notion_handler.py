@@ -1,6 +1,5 @@
+import datetime
 import os.path
-
-import settings
 from notion.client import NotionClient
 from notion.block import SubsubheaderBlock, TextBlock, FileBlock, TodoBlock, NumberedListBlock, ColumnListBlock, \
     Block, CollectionViewBlock, DividerBlock, ImageBlock, EmbedOrUploadBlock
@@ -226,7 +225,7 @@ class NotionHandler:
             yield task_msg
 
     def get_new_task(self, task: CollectionRowBlock):
-        new_task_txt = f"Найдена новая задача! Была создана: {task.created}"
+        new_task_txt = self.__txt_to_bold(f"Найдена новая задача!\nБыла создана: {task.created}\n")
         new_task_txt += self.__get_msg(task)
         return new_task_txt
 
@@ -239,18 +238,14 @@ class NotionHandler:
                 yield task_msg
 
     def new_task_available(self):
-        if time() - settings.time_stamp > 1800:
-            main_page = self.client.get_block(self.NOTION_PAGE_URL)
-            latest_task = main_page.collection.get_rows()[0]
-            if latest_task.id == settings.LAST_TASK_ID:
-                return False
-            else:
-                with open("settings.py", "w") as f:
-                    f.writelines([f"LAST_TASK_ID = '{latest_task.id}'\n", f"time_stamp = {time()}"])
-                print(f"New task found: {latest_task.id} {latest_task.created}")
-                return latest_task
-        else:
-            return False
+        main_page = self.client.get_block(self.NOTION_PAGE_URL)
+        latest_task = main_page.collection.get_rows()[0]
+        when_created = latest_task.created
+        now = datetime.datetime.now()
+        diff = now - when_created
+        if diff <= datetime.timedelta(hours=12):
+            print(f"New task found: {latest_task.id} {when_created}")
+            return latest_task
 
     def __get_task_header(self, task: CollectionRowBlock):
         title = self.__txt_to_bold(task.title) + self.__END_LINE_SMBL + self.__END_LINE_SMBL
