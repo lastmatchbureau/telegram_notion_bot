@@ -1,5 +1,4 @@
-import datetime
-
+from datetime import timedelta
 import telebot
 from telebot.types import Message
 from notion_handler import NotionHandler, SearchProperties
@@ -101,7 +100,7 @@ def callback_query_handler(call):
         bot.send_message(call.message.chat.id, "Поиск завершен")
 
 
-@tl.job(interval=datetime.timedelta(minutes=30))
+@tl.job(interval=timedelta(minutes=30))
 def is_new_task_available():
     nh = NotionHandler()
     task = nh.new_task_available()
@@ -111,7 +110,7 @@ def is_new_task_available():
         bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
 
 
-@tl.job(interval=datetime.timedelta(milliseconds=15))
+@tl.job(interval=timedelta(milliseconds=15))
 def pooling():
     bot.polling()
 
