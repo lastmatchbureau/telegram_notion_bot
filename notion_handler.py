@@ -31,7 +31,7 @@ class SearchProperties:
         if "/status " in message.text:
             self.__setattr__("status", message.text.replace("/status ", ""))
         if "/date " in message.text:
-            self.__setattr__("date", message.text.replace("/date ", ""))
+            self.__setattr__("date", message.text.replace("/date ", "").capitalize())
         if "/search_name " in message.text:
             self.__setattr__("name", message.text.replace("/search_name ", ""))
         if "/search_type " in message.text:
@@ -39,6 +39,12 @@ class SearchProperties:
         if "/search_status " in message.text:
             self.__setattr__("status", message.text.replace("/search_status ", ""))
         return self
+
+    def __repr__(self):
+        return f"Имя задачи содержит строку: {self.name}\n" \
+               f"Тип задачи содержит строку: {self.t_type}\n" \
+               f"Статус задачи содержит строку: {self.status}\n" \
+               f"Дата задачи содержит строку: {self.date}\n"
 
 
 class NotionHandler:
