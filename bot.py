@@ -57,12 +57,20 @@ def search(message):
 @bot.message_handler(commands=["status", "type", "name", "date"])
 def update_search_prop(message):
     if message.chat.id in search_requests:
-        sp = search_requests[message.chat.id]
-        sp.update_search_properties(message)
+        if isinstance(search_requests[message.chat.id], SearchProperties):
+            sp = search_requests[message.chat.id]
+            sp.update_search_properties(message)
+            bot.send_message(chat_id=message.chat.id,
+                             text=f"Параметры поиска были обновлены!\n"
+                                  f"Текущие параметры:\n{sp.__repr__()}",
+                             reply_markup=use_selected_sp_reply_button)
+        else:
+            bot.send_message(chat_id=message.chat.id,
+                             text="Прежде чем начать новый поиск, завершите старый!",
+                             reply_markup=continue_search_reply_buttons)
+    else:
         bot.send_message(chat_id=message.chat.id,
-                         text=f"Параметры поиска были обновлены!\n"
-                              f"Текущие параметры:\n{sp.__repr__()}",
-                         reply_markup=use_selected_sp_reply_button)
+                         text="Для начала создайте поисковой запрос с помощью комманды /search.")
 
 
 @bot.message_handler(commands=['search_name', 'search_type', 'search_status'])
