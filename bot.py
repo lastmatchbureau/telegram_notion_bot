@@ -1,3 +1,5 @@
+import datetime
+
 import telebot
 from telebot.types import Message
 from notion_handler import NotionHandler, SearchProperties
@@ -5,11 +7,13 @@ from dotenv import load_dotenv
 from os import environ
 from upload_func import upload_file
 from buttons import start_search_reply_buttons, continue_search_reply_buttons
+from timeloop import Timeloop
 
 load_dotenv('.env')
 token = environ["API_KEY"]
 search_requests = {}
 bot = telebot.TeleBot(token)
+tl = Timeloop()
 
 
 def get_search_property(message):
@@ -97,14 +101,18 @@ def callback_query_handler(call):
         bot.send_message(call.message.chat.id, "Поиск завершен")
 
 
+@tl.job(interval=datetime.timedelta(minutes=30))
+def is_new_task_available():
+    nh = NotionHandler()
+    task = nh.new_task_available()
+    bot.send_chat_action(231584958, "typing", timeout=10)
+    new_task_txt = nh.get_new_task(task)
+    bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
+
+
 while True:
     try:
-        nh = NotionHandler()
-        task = nh.new_task_available()
-        if task:
-            bot.send_chat_action(231584958, "typing", timeout=10)
-            new_task_txt = nh.get_new_task(task)
-            bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
+        tl.start(block=True)
         bot.polling()
     except Exception as e:
         bot.send_message(231584958, e.__repr__())

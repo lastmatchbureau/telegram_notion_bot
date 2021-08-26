@@ -238,6 +238,7 @@ class NotionHandler:
                 yield task_msg
 
     def new_task_available(self):
+        print("Checking if new task is available...")
         main_page = self.client.get_block(self.NOTION_PAGE_URL)
         latest_task = main_page.collection.get_rows()[0]
         when_created = latest_task.created
