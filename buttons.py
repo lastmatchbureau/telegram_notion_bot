@@ -10,3 +10,6 @@ continue_search_reply_buttons.add(InlineKeyboardButton("Показать сле�
 continue_search_reply_buttons.add(InlineKeyboardButton("Показать следующие 5 задач в выдаче", callback_data=f"next5"))
 continue_search_reply_buttons.add(InlineKeyboardButton("Показать следующие 10 задач в выдаче", callback_data=f"next10"))
 continue_search_reply_buttons.add(InlineKeyboardButton("Закончить поиск", callback_data=f"stopsearch"))
+
+use_selected_sp_reply_button = InlineKeyboardMarkup(row_width=1)
+use_selected_sp_reply_button.add(InlineKeyboardButton("Начать поиск по заданным параметрам", callback_data="sp"))

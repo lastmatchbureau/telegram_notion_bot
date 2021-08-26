@@ -5,7 +5,7 @@ from notion_handler import NotionHandler, SearchProperties
 from dotenv import load_dotenv, set_key
 from os import environ
 from upload_func import upload_file
-from buttons import start_search_reply_buttons, continue_search_reply_buttons
+from buttons import start_search_reply_buttons, continue_search_reply_buttons, use_selected_sp_reply_button
 from timeloop import Timeloop
 
 load_dotenv('.env')
@@ -57,7 +57,12 @@ def search(message):
 @bot.message_handler(commands=["status, type, name, date"])
 def update_search_prop(message):
     if message.chat.id in search_requests:
-        search_requests[message.chat.id].update_search_properties(message)
+        sp = search_requests[message.chat.id]
+        sp.update_search_properties(message)
+        bot.send_message(chat_id=message.chat.id,
+                         text=f"Параметры поиска были обновлены!\n"
+                              f"Текущие параметры:\n{sp.__repr__()}",
+                         reply_markup=use_selected_sp_reply_button)
 
 
 @bot.message_handler(commands=['search_name', 'search_type', 'search_status'])
@@ -104,6 +109,14 @@ def callback_query_handler(call):
         search_requests.pop(search_request_id)
         nh.delete_files()
         bot.send_message(call.message.chat.id, "Поиск завершен")
+    if "sp" in call.data:
+        sp = search_requests[search_request_id]
+        tasks = nh.find_tasks(search_prop=sp)
+        bot.send_message(search_request_id,
+                         "Результатов по данному запросу может быть очень много, поэтому используйте кнопки "
+                         "под этим сообщением, чтобы управлять поисковой выдачей",
+                         reply_markup=start_search_reply_buttons)
+        search_requests[search_request_id] = tasks
 
 
 @tl.job(interval=timedelta(minutes=30))
