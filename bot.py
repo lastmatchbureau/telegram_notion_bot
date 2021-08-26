@@ -101,13 +101,14 @@ def callback_query_handler(call):
         bot.send_message(call.message.chat.id, "Поиск завершен")
 
 
-@tl.job(interval=datetime.timedelta(minutes=30))
+@tl.job(interval=datetime.timedelta(seconds=30))
 def is_new_task_available():
     nh = NotionHandler()
     task = nh.new_task_available()
     bot.send_chat_action(231584958, "typing", timeout=10)
-    new_task_txt = nh.get_new_task(task)
-    bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
+    if task:
+        new_task_txt = nh.get_new_task(task)
+        bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
 
 
 while True:
