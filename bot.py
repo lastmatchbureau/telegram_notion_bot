@@ -107,4 +107,4 @@ while True:
             bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
         bot.polling()
     except Exception as e:
-        bot.send_message(231584958, e)
+        bot.send_message(231584958, e.__repr__())
