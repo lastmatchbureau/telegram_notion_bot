@@ -11,15 +11,34 @@ from os import path
 
 class SearchProperties:
 
-    def __init__(self, name="", t_type="", status="", date=""):
+    def __init__(self, name="", t_type="", status="", date="", message=None):
         self.name = name
         self.t_type = t_type
         self.status = status
         self.date = date
+        if message is not None:
+            self.update_search_properties(message)
 
     def is_suitable(self, task: CollectionRowBlock):
         return (self.name in task.title or self.name == "") and (self.t_type in task.tip or self.t_type == "") \
                and (self.status in task.status or self.status == "") and (self.date in task.title or self.date == "")
+
+    def update_search_properties(self, message):
+        if "/name " in message.text:
+            self.__setattr__("name", message.text.replace("/name ", ""))
+        if "/type " in message.text:
+            self.__setattr__("t_type", message.text.replace("/type ", ""))
+        if "/status " in message.text:
+            self.__setattr__("status", message.text.replace("/status ", ""))
+        if "/date " in message.text:
+            self.__setattr__("date", message.text.replace("/date ", ""))
+        if "/search_name " in message.text:
+            self.__setattr__("name", message.text.replace("/search_name ", ""))
+        if "/search_type " in message.text:
+            self.__setattr__("t_type", message.text.replace("/search_type ", ""))
+        if "/search_status " in message.text:
+            self.__setattr__("status", message.text.replace("/search_status ", ""))
+        return self
 
 
 class NotionHandler:

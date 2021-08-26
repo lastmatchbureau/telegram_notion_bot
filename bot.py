@@ -15,17 +15,6 @@ bot = telebot.TeleBot(token)
 tl = Timeloop()
 
 
-def get_search_property(message):
-    sp = SearchProperties()
-    if "/search_name " in message.text:
-        sp.__setattr__("name", message.text.replace("/search_name ", ""))
-    if "/search_type " in message.text:
-        sp.__setattr__("t_type", message.text.replace("/search_type ", ""))
-    if "/search_status " in message.text:
-        sp.__setattr__("status", message.text.replace("/search_status ", ""))
-    return sp
-
-
 def delete_prefix(message: Message):
     if "/search_name " in message.text:
         message.text = message.text.replace("/search_name ", "")
@@ -55,14 +44,27 @@ def next_command(message):
 
 
 @bot.message_handler(commands=["search"])
-def search():
-    pass
+def search(message):
+    bot.send_message(message.chat.id, text="Поиск по двум и более параметрам.\n"
+                                           "Используйте комманды ниже, чтобы задать конкретные значения для поиска:\n"
+                                           "/status [Значение]\n"
+                                           "/type [Значение]\n"
+                                           "/name [Значение]\n"
+                                           "/date [Значение]\n")
+    search_requests.update({message.chat.id: SearchProperties()})
+
+
+@bot.message_handler(commands=["status, type, name, date"])
+def update_search_prop(message):
+    if message.chat.id in search_requests:
+        search_requests[message.chat.id].update_search_properties(message)
+
 
 @bot.message_handler(commands=['search_name', 'search_type', 'search_status'])
 def search_name_command(message):
     print(message.text)
     nh = NotionHandler(tg_id=message.chat.id)
-    sp = get_search_property(message)
+    sp = SearchProperties(message=message)
     tasks = nh.find_tasks(search_prop=sp)
     bot.send_message(message.chat.id,
                      "Результатов по данному запросу может быть очень много, поэтому используйте кнопки "
