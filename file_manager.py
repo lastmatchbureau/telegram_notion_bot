@@ -3,6 +3,8 @@ from pathlib import Path
 from os import remove
 import glob
 
+# TODO: create a class FileManager
+
 
 def upload_file(chat_id, file_path, api_token):
     file_size = (Path(file_path).stat().st_size / 1024) / 1024
