@@ -2,7 +2,7 @@ from datetime import timedelta
 import telebot
 from telebot.types import Message
 from notion_handler import NotionHandler, SearchProperties
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 from os import environ
 from upload_func import upload_file
 from buttons import start_search_reply_buttons, continue_search_reply_buttons
@@ -102,12 +102,15 @@ def callback_query_handler(call):
 
 @tl.job(interval=timedelta(minutes=30))
 def is_new_task_available():
+    load_dotenv(".env")
     nh = NotionHandler()
     task = nh.new_task_available()
-    bot.send_chat_action(231584958, "typing", timeout=10)
+    bot.send_chat_action(environ["ADMIN_TG_ID"], "typing", timeout=10)
     if task:
-        new_task_txt = nh.get_new_task(task)
-        bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
+        if environ["last_id"] != task.id:
+            new_task_txt = nh.get_new_task(task)
+            bot.send_message(environ["ADMIN_TG_ID"], new_task_txt, parse_mode="MarkdownV2")
+            set_key(".env", "\nlast_id", task.id)
 
 
 @tl.job(interval=timedelta(milliseconds=15))
@@ -119,4 +122,4 @@ while True:
     try:
         tl.start(block=True)
     except Exception as e:
-        bot.send_message(231584958, e.__repr__())
+        bot.send_message(environ["ADMIN_TG_ID"], e.__repr__())
