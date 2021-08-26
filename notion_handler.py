@@ -18,9 +18,8 @@ class SearchProperties:
         self.date = date
 
     def is_suitable(self, task: CollectionRowBlock):
-        # TODO: create date checker
         return (self.name in task.title or self.name == "") and (self.t_type in task.tip or self.t_type == "") \
-               and (self.status in task.status or self.status == "") and (self.date == task.created or self.date == "")
+               and (self.status in task.status or self.status == "") and (self.date in task.title or self.date == "")
 
 
 class NotionHandler:
