@@ -54,7 +54,7 @@ def search(message):
     search_requests.update({message.chat.id: SearchProperties()})
 
 
-@bot.message_handler(commands=["status, type, name, date"])
+@bot.message_handler(commands=["status", "type", "name", "date"])
 def update_search_prop(message):
     if message.chat.id in search_requests:
         sp = search_requests[message.chat.id]
