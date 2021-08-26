@@ -249,6 +249,8 @@ class NotionHandler:
                     f.writelines([f"LAST_TASK_ID = '{latest_task.id}'\n", f"time_stamp = {time()}"])
                 print(f"New task found: {latest_task.id} {latest_task.created}")
                 return latest_task
+        else:
+            return False
 
     def __get_task_header(self, task: CollectionRowBlock):
         title = self.__txt_to_bold(task.title) + self.__END_LINE_SMBL + self.__END_LINE_SMBL
