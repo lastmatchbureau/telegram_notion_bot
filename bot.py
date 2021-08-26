@@ -54,6 +54,10 @@ def next_command(message):
     search_requests.update({message.chat.id: tasks})
 
 
+@bot.message_handler(commands=["search"])
+def search():
+    pass
+
 @bot.message_handler(commands=['search_name', 'search_type', 'search_status'])
 def search_name_command(message):
     print(message.text)
