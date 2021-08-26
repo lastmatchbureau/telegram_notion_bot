@@ -113,18 +113,18 @@ class NotionHandler:
         return txt
 
     def __ss_header_wrapper(self, item: SubsubheaderBlock) -> str:
-        return self.__txt_to_bold(item.title) + self.__END_LINE_SMBL
+        return self.__txt_to_bold(item.title) + self.__END_LINE_SMBL * 2
 
     def __txt_wrapper(self, item: TextBlock) -> str:
         txt = self.__prepare_txt_4_md(item.title_plaintext)
-        return txt + self.__END_LINE_SMBL
+        return txt + self.__END_LINE_SMBL * 2
 
     def __todo_wrapper(self, item: TodoBlock) -> str:
         txt = self.__prepare_txt_4_md(item.title_plaintext)
         if item.checked:
-            txt += self.__TODO_TRUE_SMBL + self.__END_LINE_SMBL
+            txt += self.__TODO_TRUE_SMBL + self.__END_LINE_SMBL * 2
         else:
-            txt += self.__TODO_FALSE_SMBL + self.__END_LINE_SMBL
+            txt += self.__TODO_FALSE_SMBL + self.__END_LINE_SMBL * 2
         return txt
 
     def __file_wrapper(self, item: FileBlock) -> str:

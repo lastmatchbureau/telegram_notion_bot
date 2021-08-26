@@ -101,7 +101,7 @@ def callback_query_handler(call):
         bot.send_message(call.message.chat.id, "Поиск завершен")
 
 
-@tl.job(interval=datetime.timedelta(seconds=30))
+@tl.job(interval=datetime.timedelta(minutes=30))
 def is_new_task_available():
     nh = NotionHandler()
     task = nh.new_task_available()
@@ -111,9 +111,13 @@ def is_new_task_available():
         bot.send_message(231584958, new_task_txt, parse_mode="MarkdownV2")
 
 
+@tl.job(interval=datetime.timedelta(milliseconds=15))
+def pooling():
+    bot.polling()
+
+
 while True:
     try:
         tl.start(block=True)
-        bot.polling()
     except Exception as e:
         bot.send_message(231584958, e.__repr__())
