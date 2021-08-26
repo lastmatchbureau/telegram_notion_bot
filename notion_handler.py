@@ -7,7 +7,6 @@ from notion.collection import CollectionRowBlock
 from os import environ
 from dotenv import load_dotenv
 from os import path
-from time import time
 
 
 class SearchProperties:
@@ -247,6 +246,18 @@ class NotionHandler:
         if diff <= datetime.timedelta(hours=12):
             print(f"New task found: {latest_task.id} {when_created}")
             return latest_task
+
+    def check_almst_done_statuses(self):
+        counter = 0
+        load_dotenv(".env")
+        print("Checking if almost done statuses in more than 4 tasks...")
+        main_page = self.client.get_block(self.NOTION_PAGE_URL)
+        for task in main_page.collection.get_rows():
+            print(task.status)
+            if "Почти" in task.status:
+                counter += 1
+            if environ["ALMOST_DONE_QUANTITY"] == str(counter):
+                return True
 
     def __get_task_header(self, task: CollectionRowBlock):
         title = self.__txt_to_bold(task.title) + self.__END_LINE_SMBL + self.__END_LINE_SMBL

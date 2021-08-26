@@ -69,7 +69,7 @@ def search_name_command(message):
 
 @bot.callback_query_handler(func=lambda x: True)
 def callback_query_handler(call):
-    bot.send_chat_action(call.message.chat.id, "typing")
+    bot.send_chat_action(call.message.chat.id, "typing", timeout=30)
     search_request_id = call.message.chat.id
     nh = NotionHandler(tg_id=call.message.chat.id)
     try:
@@ -107,10 +107,23 @@ def is_new_task_available():
     task = nh.new_task_available()
     bot.send_chat_action(environ["ADMIN_TG_ID"], "typing", timeout=10)
     if task:
-        if environ["last_id"] != task.id:
+        if environ["LAST_TASK_ID"] != task.id:
             new_task_txt = nh.get_new_task(task)
             bot.send_message(environ["ADMIN_TG_ID"], new_task_txt, parse_mode="MarkdownV2")
-            set_key(".env", "\nlast_id", task.id)
+            set_key(".env", "\nLAST_TASK_ID", task.id)
+
+
+@tl.job(interval=timedelta(hours=12))
+def if_status_almost_done_in_more_than_4_tasks():
+    nh = NotionHandler()
+    status_almost_done_in_more_than_4_tasks = nh.check_almst_done_statuses()
+    bot.send_chat_action(environ["ADMIN_TG_ID"], "typing", timeout=10)
+    if status_almost_done_in_more_than_4_tasks:
+        bot.send_message(chat_id=environ["ADMIN_TG_ID"],
+                         text="Уведомление:\n"
+                              "Статус 'Почти готово' в более чем 4 задачах\n"
+                              "Чтобы отобразить задачи используйте комманду: /search_status Почти готово",
+                         parse_mode="MarkdownV2")
 
 
 @tl.job(interval=timedelta(milliseconds=15))
