@@ -115,7 +115,7 @@ def callback_query_handler(call):
         bot.send_message(search_request_id,
                          "Результатов по данному запросу может быть очень много, поэтому используйте кнопки "
                          "под этим сообщением, чтобы управлять поисковой выдачей",
-                         reply_markup=start_search_reply_buttons)
+                         reply_markup=continue_search_reply_buttons)
         search_requests[search_request_id] = tasks
 
 
