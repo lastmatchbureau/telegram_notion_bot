@@ -38,6 +38,8 @@ class SearchProperties:
             self.__setattr__("t_type", message.text.replace("/search_type ", ""))
         if "/search_status " in message.text:
             self.__setattr__("status", message.text.replace("/search_status ", ""))
+        if "/search_date " in message.text:
+            self.__setattr__("date", message.text.replace("/search_date ", ""))
         return self
 
     def __repr__(self):

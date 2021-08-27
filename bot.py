@@ -26,12 +26,27 @@ def delete_prefix(message: Message):
     return message
 
 
-@bot.message_handler(commands=["start"])
+@bot.message_handler(commands=["start", "help"])
 def start_command(message):
-    bot.send_message(message.chat.id, "Send /test to get started")
+    bot.send_message(message.chat.id, "*Доступные комманды:*\n"
+                                      "/start - список комманд и функций"
+                                      "/help - список комманд и функций"
+                                      "/show_all - отобразить все задачи"
+                                      "/search - поиск по двум и более параметрам"
+                                      "/search_name - поиск по имени"
+                                      "/search_type - поиск по типу"
+                                      "/search_status - поиск по статусу"
+                                      "/search_date - поиск по дате"
+                                      "/update_state - проверяет наличие новых задач и статусы старых"
+                                      ""
+                                      "*Функции:*\n"
+                                      "1. Бот пишет в чат, если появляется новая задача"
+                                      "2. Бот пишет в чат, когда больше 4 задач находятся в статусе (Почти готово)"
+                                      "3. Бот пишет в чат, когда появилась задача, но у нее отсутствует тип задачи"
+                                      "4. Бот пишет в чат, когда все текущие задачи находятся в статусе Done")
 
 
-@bot.message_handler(commands=["test"])
+@bot.message_handler(commands=["show_all"])
 def next_command(message):
     print(message.text)
     nh = NotionHandler(tg_id=message.chat.id)
@@ -74,7 +89,7 @@ def update_search_prop(message):
                          text="Для начала создайте поисковой запрос с помощью комманды /search.")
 
 
-@bot.message_handler(commands=['search_name', 'search_type', 'search_status'])
+@bot.message_handler(commands=['search_name', 'search_type', 'search_status', 'search_date'])
 def search_name_command(message):
     print(message.text)
     nh = NotionHandler(tg_id=message.chat.id)
@@ -85,6 +100,16 @@ def search_name_command(message):
                      "под этим сообщением, чтобы управлять поисковой выдачей",
                      reply_markup=start_search_reply_buttons)
     search_requests.update({message.chat.id: tasks})
+
+
+@bot.message_handler(commands=['update_state'])
+def update_state(message):
+    if status_done_in_all_current_tasks(tg_id=message.chat.id) or \
+       status_almost_done_in_more_than_4_tasks(tg_id=message.chat.id) or \
+       new_task_available(tg_id=message.chat.id):
+        pass
+    else:
+        bot.send_message(message.chat.id, "Никаких обновлений не обнаружено!")
 
 
 @bot.callback_query_handler(func=lambda x: True)
@@ -130,11 +155,11 @@ def callback_query_handler(call):
 
 
 @tl.job(interval=timedelta(minutes=30))
-def is_new_task_available():
+def new_task_available(tg_id=environ["ADMIN_TG_ID"]):
     load_dotenv(".env")
     nh = NotionHandler()
     task = nh.new_task_available()
-    bot.send_chat_action(environ["ADMIN_TG_ID"], "typing", timeout=10)
+    bot.send_chat_action(tg_id, "typing", timeout=10)
     if task:
         if environ["LAST_TASK_ID"] != task.id:
             new_task_txt = nh.get_new_task(task)
@@ -143,28 +168,30 @@ def is_new_task_available():
 
 
 @tl.job(interval=timedelta(hours=12))
-def if_status_almost_done_in_more_than_4_tasks():
+def status_almost_done_in_more_than_4_tasks(tg_id=environ["ADMIN_TG_ID"]):
     nh = NotionHandler()
     status_almost_done_in_more_than_4_tasks = nh.check_almst_done_statuses()
-    bot.send_chat_action(environ["ADMIN_TG_ID"], "typing", timeout=10)
+    bot.send_chat_action(tg_id, "typing", timeout=10)
     if status_almost_done_in_more_than_4_tasks:
-        bot.send_message(chat_id=environ["ADMIN_TG_ID"],
+        bot.send_message(chat_id=tg_id,
                          text="Уведомление:\n"
                               "Статус 'Почти готово' в более чем 4 задачах\n"
                               "Чтобы отобразить задачи используйте комманду: /search_status Почти готово",
                          parse_mode="MarkdownV2")
+    return status_almost_done_in_more_than_4_tasks
 
 
 @tl.job(interval=timedelta(hours=12))
-def if_status_done_in_all_current_tasks():
+def status_done_in_all_current_tasks(tg_id=environ["ADMIN_TG_ID"]):
     nh = NotionHandler()
     status_done_in_all_current_tasks = nh.check_done_statuses()
-    bot.send_chat_action(environ["ADMIN_TG_ID"], "typing", timeout=10)
+    bot.send_chat_action(tg_id, "typing", timeout=10)
     if status_done_in_all_current_tasks:
-        bot.send_message(chat_id=environ["ADMIN_TG_ID"],
+        bot.send_message(chat_id=tg_id,
                          text="Уведомление:\n"
                               "Статус 'Done' во всех задачах!\n",
                          parse_mode="MarkdownV2")
+    return status_done_in_all_current_tasks
 
 
 @tl.job(interval=timedelta(milliseconds=15))
