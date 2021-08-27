@@ -11,9 +11,9 @@ from timeloop import Timeloop
 load_dotenv('.env')
 token = environ["API_KEY"]
 search_requests = {}
-bot = TeleBot(token)
+bot = TeleBot(token=token)
 tl = Timeloop()
-fm = FileManager()
+fm = FileManager(token=token)
 
 
 def delete_prefix(message: Message):
@@ -111,7 +111,7 @@ def callback_query_handler(call):
             bot.send_message(call.message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
             if files_to_upload:
                 for file in files_to_upload:
-                    fm.upload_file(call.message.chat.id, file, token)
+                    fm.upload_file(call.message.chat.id, file)
 
         bot.send_message(call.message.chat.id, "Меню поиска:", reply_markup=continue_search_reply_buttons)
     if "stop" in call.data:
