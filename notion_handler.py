@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import os.path
 from notion.client import NotionClient
 from notion.block import SubsubheaderBlock, TextBlock, FileBlock, TodoBlock, NumberedListBlock, ColumnListBlock, \
@@ -265,11 +265,21 @@ class NotionHandler:
         main_page = self.client.get_block(self.NOTION_PAGE_URL)
         latest_task = main_page.collection.get_rows()[0]
         when_created = latest_task.created
-        now = datetime.datetime.now()
+        now = datetime.now()
         diff = now - when_created
-        if diff <= datetime.timedelta(hours=12):
+        if diff <= timedelta(hours=12):
             print(f"New task found: {latest_task.id} {when_created}")
             return latest_task
+
+    def check_done_statuses(self):
+        load_dotenv(".env")
+        print("Checking if done statuses in all tasks...")
+        main_page = self.client.get_block(self.NOTION_PAGE_URL)
+        for task in main_page.collection.get_rows():
+            if task.created.month == datetime.now().month:
+                if not ("DONE" in task.status):
+                    return False
+        return True
 
     def check_almst_done_statuses(self):
         counter = 0
@@ -292,5 +302,6 @@ class NotionHandler:
 
 if __name__ == "__main__":
     nh = NotionHandler()
+    nh.check_done_statuses()
     for task in nh.get_tasks():
         print(task)

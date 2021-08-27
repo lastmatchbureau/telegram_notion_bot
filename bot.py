@@ -155,6 +155,18 @@ def if_status_almost_done_in_more_than_4_tasks():
                          parse_mode="MarkdownV2")
 
 
+@tl.job(interval=timedelta(hours=12))
+def if_status_done_in_all_current_tasks():
+    nh = NotionHandler()
+    status_done_in_all_current_tasks = nh.check_done_statuses()
+    bot.send_chat_action(environ["ADMIN_TG_ID"], "typing", timeout=10)
+    if status_done_in_all_current_tasks:
+        bot.send_message(chat_id=environ["ADMIN_TG_ID"],
+                         text="Уведомление:\n"
+                              "Статус 'Done' во всех задачах!\n",
+                         parse_mode="MarkdownV2")
+
+
 @tl.job(interval=timedelta(milliseconds=15))
 def pooling():
     bot.polling()
