@@ -4,7 +4,7 @@ from telebot import TeleBot
 from notion_handler import NotionHandler, SearchProperties
 from dotenv import load_dotenv, set_key
 from os import environ
-from file_manager import upload_file, delete_downloaded_files, get_downloaded_files
+from file_manager import FileManager
 from buttons import start_search_reply_buttons, continue_search_reply_buttons, use_selected_sp_reply_button
 from timeloop import Timeloop
 
@@ -13,6 +13,7 @@ token = environ["API_KEY"]
 search_requests = {}
 bot = TeleBot(token)
 tl = Timeloop()
+fm = FileManager()
 
 
 def delete_prefix(message: Message):
@@ -105,17 +106,17 @@ def callback_query_handler(call):
                 bot.send_message(call.message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
                 bot.send_message(call.message.chat.id, "Поиск завершен")
                 return None
-            files_to_upload = get_downloaded_files(search_request_id)
+            files_to_upload = fm.get_downloaded_files(search_request_id)
             print(files_to_upload)
             bot.send_message(call.message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
             if files_to_upload:
                 for file in files_to_upload:
-                    upload_file(call.message.chat.id, file, token)
+                    fm.upload_file(call.message.chat.id, file, token)
 
         bot.send_message(call.message.chat.id, "Меню поиска:", reply_markup=continue_search_reply_buttons)
     if "stop" in call.data:
         search_requests.pop(search_request_id)
-        delete_downloaded_files(search_request_id)
+        fm.delete_downloaded_files(search_request_id)
         bot.send_message(call.message.chat.id, "Поиск завершен")
     if "sp" in call.data:
         nh = NotionHandler(tg_id=call.message.chat.id)
