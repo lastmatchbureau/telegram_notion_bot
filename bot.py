@@ -108,8 +108,8 @@ def update_state(message):
     stat_dn_all = status_done_in_all_current_tasks(tg_id=message.chat.id)
     new_tsk_a = new_task_available(tg_id=message.chat.id)
     stat_almst_dn = status_almost_done_in_more_than_4_tasks(tg_id=message.chat.id)
-    if stat_dn_all and \
-       new_tsk_a and \
+    if stat_dn_all or \
+       new_tsk_a or \
        stat_almst_dn:
         pass
     else:
