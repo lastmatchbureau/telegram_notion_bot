@@ -12,15 +12,14 @@ class FileManager:
 
     def upload_file(self, chat_id, file_path):
         file_size = (Path(file_path).stat().st_size / 1024) / 1024
-        if file_size <= 50:
-            print(f"sending {file_path} with size: {file_size} mb")
-            url = f'{self.base_url}/sendDocument?chat_id={chat_id}'
-            r = requests.post(url, files={"document": open(file_path, 'rb')})  # note: files, not data
-            if r.status_code == 200:
-                print(f"sent {file_path} with size: {file_size} mb")
+        print(f"sending {file_path} with size: {file_size} mb")
+        url = f'{self.base_url}/sendDocument?chat_id={chat_id}'
+        r = requests.post(url, files={"document": open(file_path, 'rb')})  # note: files, not data
+        if r.status_code == 200:
+            print(f"sent {file_path} with size: {file_size} mb")
         else:
             url = f'{self.base_url}/sendMessage'
-            r = requests.post(url, json={"text": f"{file_path.replace('download/', '')} is bigger than 50 mb.",
+            r = requests.post(url, json={"text": f"{file_path.replace(f'download/{chat_id}', '')} can not be sent",
                                          "chat_id": chat_id},)
         remove(file_path)
 
