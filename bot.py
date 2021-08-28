@@ -110,7 +110,7 @@ def update_state(message):
        new_task_available(tg_id=message.chat.id):
         pass
     else:
-        bot.send_message(message.chat.id, "Никаких обновлений не обнаружено!")
+        bot.send_message(message.chat.id, "Никаких обновлений не обнаружено\!")
 
 
 @bot.callback_query_handler(func=lambda x: True)
