@@ -110,7 +110,7 @@ def update_state(message):
        new_task_available(tg_id=message.chat.id):
         pass
     else:
-        bot.send_message(message.chat.id, "Никаких обновлений не обнаружено\!")
+        bot.send_message(message.chat.id, "Никаких обновлений не обнаружено!")
 
 
 @bot.callback_query_handler(func=lambda x: True)
@@ -190,7 +190,7 @@ def status_done_in_all_current_tasks(tg_id=environ["ADMIN_TG_ID"]):
     if status_done_in_all_current_tasks:
         bot.send_message(chat_id=tg_id,
                          text="Уведомление:\n"
-                              "Статус 'Done' во всех задачах!\n",
+                              "Статус 'Done' во всех задачах\!\n",
                          parse_mode="MarkdownV2")
     return status_done_in_all_current_tasks
 
