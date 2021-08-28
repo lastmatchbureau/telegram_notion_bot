@@ -105,10 +105,11 @@ def search_name_command(message):
 
 @bot.message_handler(commands=['update_state'])
 def update_state(message):
-    if status_done_in_all_current_tasks(tg_id=message.chat.id) is False and \
-       new_task_available(tg_id=message.chat.id) is False and \
-       status_almost_done_in_more_than_4_tasks(tg_id=message.chat.id) is False:
-
+    if status_done_in_all_current_tasks(tg_id=message.chat.id) and \
+       new_task_available(tg_id=message.chat.id) and \
+       status_almost_done_in_more_than_4_tasks(tg_id=message.chat.id):
+        pass
+    else:
         bot.send_message(message.chat.id, "Никаких обновлений не обнаружено!")
 
 
