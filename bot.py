@@ -163,7 +163,7 @@ def new_task_available(tg_id=environ["ADMIN_TG_ID"]):
     if task:
         if environ["LAST_TASK_ID"] != task.id:
             new_task_txt = nh.get_new_task(task)
-            bot.send_message(environ["ADMIN_TG_ID"], new_task_txt, parse_mode="MarkdownV2")
+            bot.send_message(tg_id, new_task_txt, parse_mode="MarkdownV2")
             set_key(".env", "\nLAST_TASK_ID", task.id)
 
 
@@ -202,5 +202,8 @@ def pooling():
 while True:
     try:
         tl.start(block=True)
+    except RuntimeError as e:
+        bot.send_message(environ["ADMIN_TG_ID"], e.__repr__() + "\n BOT TERMINATED")
+        exit(0)
     except Exception as e:
         bot.send_message(environ["ADMIN_TG_ID"], e.__repr__())
