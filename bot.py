@@ -49,7 +49,6 @@ def start_command(message):
 
 @bot.message_handler(commands=["show_all"])
 def next_command(message):
-    print(message.text)
     nh = NotionHandler(tg_id=message.chat.id)
     sp = SearchProperties()
     tasks = nh.find_tasks(search_prop=sp)
@@ -92,7 +91,6 @@ def update_search_prop(message):
 
 @bot.message_handler(commands=['search_name', 'search_type', 'search_status', 'search_date'])
 def search_name_command(message):
-    print(message.text)
     nh = NotionHandler(tg_id=message.chat.id)
     sp = SearchProperties(message=message)
     tasks = nh.find_tasks(search_prop=sp)
@@ -136,7 +134,6 @@ def callback_query_handler(call):
                 bot.send_message(call.message.chat.id, "Поиск завершен")
                 return None
             files_to_upload = fm.get_downloaded_files(search_request_id)
-            print(files_to_upload)
             bot.send_message(call.message.chat.id, task, parse_mode="MarkdownV2", disable_web_page_preview=True)
             if files_to_upload:
                 for file in files_to_upload:
@@ -178,9 +175,9 @@ def status_almost_done_in_more_than_4_tasks(tg_id=environ["ADMIN_TG_ID"]):
     bot.send_chat_action(tg_id, "typing", timeout=10)
     if status_almost_done_in_more_than_4_tasks:
         bot.send_message(chat_id=tg_id,
-                         text="Уведомление:\n"
-                              "Статус 'Почти готово' в более чем 4 задачах\n"
-                              "Чтобы отобразить задачи используйте комманду: /search_status Почти готово",
+                         text="*Уведомление:*\n"
+                              "Статус _'Почти готово'_ в 4 или более задачах\n"
+                              "Чтобы отобразить задачи используйте комманду: /search\_status Почти готово",
                          parse_mode="MarkdownV2")
     return status_almost_done_in_more_than_4_tasks
 
@@ -192,8 +189,8 @@ def status_done_in_all_current_tasks(tg_id=environ["ADMIN_TG_ID"]):
     bot.send_chat_action(tg_id, "typing", timeout=10)
     if status_done_in_all_current_tasks:
         bot.send_message(chat_id=tg_id,
-                         text="Уведомление:\n"
-                              "Статус 'Done' во всех задачах\!\n",
+                         text="*Уведомление:*\n"
+                              "Статус _'Done'_ во всех текущих задачах\!\n",
                          parse_mode="MarkdownV2")
     return status_done_in_all_current_tasks
 
