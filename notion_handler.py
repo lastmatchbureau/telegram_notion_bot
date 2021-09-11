@@ -20,12 +20,10 @@ class SearchProperties:
             self.update_search_properties(message)
 
     def is_suitable(self, task: CollectionRowBlock):
-        if task.status is None:
-            task.status = ''
-        if task.tip is None:
-            task.tip = ''
-        return (self.name in task.title or self.name == "") and (self.t_type in task.tip or self.t_type == "") \
-               and (self.status in task.status or self.status == "") and (self.date in task.title or self.date == "")
+        return (self.name in task.title or self.name == "") and \
+               (task.tip is None or self.t_type in task.tip or self.t_type == "") and \
+               (task.status is None or self.status in task.status or self.status == "") and\
+               (self.date in task.title or self.date == "")
 
     def update_search_properties(self, message):
         if "/name " in message.text:

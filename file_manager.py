@@ -36,9 +36,10 @@ class FileManager:
         file_size = self.__get_file_size(file_path)
         file_name = self.__get_file_name(file_path, chat_id)
         print(f"sending {file_path} with size: {file_size} mb")
-        self.__send_message(chat_id, text=f"Отправляю {file_name} с размером: {file_size} mb.")
-        self.__send_document(chat_id, file_path)
-        remove(file_path)
+        if file_size < 50:
+            self.__send_message(chat_id, text=f"Отправляю {file_name} с размером: {file_size} mb.")
+            self.__send_document(chat_id, file_path)
+            remove(file_path)
 
     def delete_downloaded_files(self, tg_id):
         for file in glob(f"{self.downloaded_files_folder_name}/{tg_id}/*"):
