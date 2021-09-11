@@ -283,7 +283,7 @@ class NotionHandler:
         main_page = self.client.get_block(self.NOTION_PAGE_URL)
         for task in main_page.collection.get_rows():
             if task.created.month == datetime.now().month:
-                if not ("DONE" in task.status):
+                if task.status is None or not ("DONE" in task.status):
                     print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] NOK")
                     return False
         print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] OK")
@@ -295,7 +295,7 @@ class NotionHandler:
         print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] Checking if almost done statuses in more than 4 tasks...")
         main_page = self.client.get_block(self.NOTION_PAGE_URL)
         for task in main_page.collection.get_rows():
-            if "Почти" in task.status:
+            if task.status is None or "Почти" in task.status:
                 counter += 1
             if environ["ALMOST_DONE_QUANTITY"] == str(counter):
                 print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] OK")
