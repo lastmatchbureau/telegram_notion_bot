@@ -8,7 +8,7 @@ class FileManager:
     def __init__(self, token, downloaded_files_folder_name="download"):
         self.api_token = token
         self.downloaded_files_folder_name = downloaded_files_folder_name
-        self.base_url = f"http://0.0.0.0:8081/bot{self.api_token}"
+        self.base_url = f"https://api.telegram.org/bot{self.api_token}"
 
     @staticmethod
     def __get_file_name(file_path, chat_id):
