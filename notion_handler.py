@@ -81,6 +81,10 @@ class NotionHandler:
     def __get_file_path(self, file_name: str) -> str:
         user_folder_path = path.join("download", str(self.tg_id))
         try:
+            os.mkdir("download")
+        except FileExistsError:
+            pass
+        try:
             os.mkdir(user_folder_path)
         except FileExistsError:
             pass
