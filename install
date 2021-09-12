@@ -1,0 +1,15 @@
+#!/bin/bash
+# git using variables
+echo -e "Please enter github token: "
+read TOKEN
+cd /TGBOTS/
+git clone https://$TOKEN:x-oauth-basic@github.com/Smarandii/LastMatch-NotionBot-private
+ls
+echo -e "Press ENTER to continue..."
+read TOKEN
+cd LastMatch-NotionBot-private
+python3.9 -m venv env
+. env/bin/activate
+pip install -r requirements.txt
+python3.9 bot.py &
+disown %1
