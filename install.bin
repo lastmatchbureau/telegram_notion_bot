@@ -7,9 +7,13 @@ git clone https://$TOKEN:x-oauth-basic@github.com/Smarandii/LastMatch-NotionBot-
 ls
 echo -e "Press ENTER to continue..."
 read TOKEN
+echo -e "Creating a virtual environment..."
 cd LastMatch-NotionBot-private
 python3.9 -m venv env
+echo -e "Activating..."
 . env/bin/activate
+echo -e "Installing requirements..."
 pip install -r requirements.txt
+echo -e "Press ENTER to run bot.py..."
 python3.9 bot.py &
 disown %1
