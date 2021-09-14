@@ -278,7 +278,7 @@ class NotionHandler:
         if diff <= timedelta(hours=12):
             print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] FOUND {latest_task.id} {when_created}")
             return latest_task
-        print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] NOT FOUND")
+        print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] NOT FOUND LATTEST TASK CREATED: {latest_task.created.strftime('%d.%m.%y %H:%M:%S')}")
         return False
 
     def check_done_statuses(self):
@@ -288,7 +288,7 @@ class NotionHandler:
         for task in main_page.collection.get_rows():
             if task.created.month == datetime.now().month:
                 if task.status is None or not ("DONE" in task.status):
-                    print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] NOK")
+                    print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] NOK. FOUND: {task.status}")
                     return False
         print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] OK")
         return True
@@ -299,12 +299,13 @@ class NotionHandler:
         print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] Checking if almost done statuses in more than 4 tasks...")
         main_page = self.client.get_block(self.NOTION_PAGE_URL)
         for task in main_page.collection.get_rows():
-            if task.status is None or "Почти" in task.status:
-                counter += 1
+            if not task.status is None:
+                if "Почти" in task.status:
+                    counter += 1
             if environ["ALMOST_DONE_QUANTITY"] == str(counter):
                 print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] OK")
                 return True
-        print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] NOK")
+        print(f"[{datetime.now().strftime('%d.%m.%y %H:%M:%S')}] NOK. ALMOST_DONE_QUANTITY = {counter}")
         return False
 
     def __get_task_header(self, task: CollectionRowBlock):
